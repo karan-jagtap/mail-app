@@ -1,0 +1,78 @@
+.navbar-container {
+  background-color: #0d0106 !important;
+  margin: 0px;
+  padding: 0px;
+}
+
+.navbar-header-container {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+
+.navbar-header-appname {
+  margin-left: 10px;
+}
+
+.rounded-icon {
+  border-radius: 50%;
+  height: 36px;
+  width: 36px;
+  border: 2px solid aliceblue;
+  cursor: pointer;
+}
+
+.rounded-icon-inner {
+  border-radius: 50%;
+  height: 100px;
+  width: 100px;
+  margin-top: 20px;
+}
+
+.navbar-brand-img {
+  margin: 5px 0px;
+  border-radius: 50%;
+}
+
+.dropdown-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.logout-btn {
+  width: 100%;
+  background-color: #c6342c;
+  outline: none;
+  border: none;
+  border-radius: 0px;
+  margin-top: 10px;
+  padding: 7px 0px;
+  color: white;
+  border-bottom-left-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
+}
+
+.nav-link-btn {
+  background-color: transparent;
+  color: whitesmoke !important;
+  outline: none;
+  border: none;
+  border-radius: 10px;
+  padding: 5px 10px !important;
+  font-size: 14px;
+}
+
+.nav-link-btn-active {
+  background-color: whitesmoke !important;
+  color: #0d0106 !important;
+  border-radius: 10px;
+}
+
+.nav-link-btn:hover {
+  background-color: whitesmoke !important;
+  color: #0d0106 !important;
+  border-radius: 10px;
+}

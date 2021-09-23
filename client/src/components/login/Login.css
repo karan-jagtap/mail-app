@@ -1,0 +1,39 @@
+#login-component .custom-row {
+  height: 100vh;
+  margin: 0px;
+}
+
+#login-component .custom-column {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+#login-component .custom-column.left-column {
+  background-color: #0d0106;
+  color: antiquewhite;
+}
+
+#login-component .app-logo {
+  height: 80px;
+  width: 80px;
+}
+
+#login-component .header-app-name {
+  font-size: 32px;
+  letter-spacing: 2px;
+  margin-top: 10px;
+}
+.header-highlight-text {
+  color: #c6342c;
+}
+
+#login-component .header-tagline {
+  font-size: 18px;
+  letter-spacing: 0.5px;
+}
+
+#login-component .header-message {
+  margin-bottom: 10px;
+}
