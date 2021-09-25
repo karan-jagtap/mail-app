@@ -65,7 +65,6 @@ class FormEmail extends Component {
       errors: [],
       showErrorBlock: false,
       isUploadInProgres: false,
-      // disableSubmitButton:false,
       successUpload: 0,
       failedUpload: 0,
       decodedFiles: [],
@@ -213,35 +212,35 @@ class FormEmail extends Component {
         console.log("/send-email - res - ", res);
         const { success, message_text } = res.data;
         if (success) {
-          // Swal.fire({
-          //   icon: "success",
-          //   title: "Email Sent",
-          //   text: "Email sent successfully.",
-          //   showConfirmButton: true,
-          //   confirmButtonText: "Okay",
-          //   confirmButtonColor: "#c6342c",
-          //   allowOutsideClick: false,
-          //   preConfirm: () => {
-          //     self.clearState();
-          //   },
-          // });
+          Swal.fire({
+            icon: "success",
+            title: "Email Sent",
+            text: "Email sent successfully.",
+            showConfirmButton: true,
+            confirmButtonText: "Okay",
+            confirmButtonColor: "#c6342c",
+            allowOutsideClick: false,
+            preConfirm: () => {
+              self.clearState();
+            },
+          });
         } else {
-          // Swal.fire({
-          //   icon: "error",
-          //   title: "Session Expired",
-          //   text: message_text,
-          //   showConfirmButton: true,
-          //   confirmButtonText: "Go to Login",
-          //   confirmButtonColor: "#c6342c",
-          //   allowOutsideClick: false,
-          //   preConfirm: () => {
-          //     localStorage.removeItem("token");
-          //     sessionStorage.removeItem("email");
-          //     sessionStorage.removeItem("name");
-          //     sessionStorage.removeItem("picture");
-          //     self.props.history.replace("/login");
-          //   },
-          // });
+          Swal.fire({
+            icon: "error",
+            title: "Session Expired",
+            text: message_text,
+            showConfirmButton: true,
+            confirmButtonText: "Go to Login",
+            confirmButtonColor: "#c6342c",
+            allowOutsideClick: false,
+            preConfirm: () => {
+              localStorage.removeItem("token");
+              sessionStorage.removeItem("email");
+              sessionStorage.removeItem("name");
+              sessionStorage.removeItem("picture");
+              self.props.history.replace("/login");
+            },
+          });
         }
       })
       .catch((err) => console.log("/send-email - err - ", err));
@@ -348,10 +347,6 @@ class FormEmail extends Component {
             icon: "error",
             title: "File Upload Error",
             text: message,
-            // showConfirmButton: true,
-            // confirmButtonText: "Okay",
-            // confirmButtonColor: "#c6342c",
-            // allowOutsideClick: false,
           });
         }
       })
@@ -489,7 +484,7 @@ class FormEmail extends Component {
                 ref={this.bodyRef}
                 id="body-block"
                 name="body"
-                className="form-control body-block"
+                className="form-control form-control-sm body-block"
                 placeholder="Start typing..."
                 contentEditable
                 onInput={this.onInputChange}
