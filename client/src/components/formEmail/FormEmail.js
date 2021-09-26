@@ -69,10 +69,53 @@ class FormEmail extends Component {
       failedUpload: 0,
       decodedFiles: [],
       originalFiles: [],
+      from: props.from,
+      firstTime: true,
     };
 
     this.bodyRef = React.createRef();
     this.fileRef = React.createRef();
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    if (props.from === "draft" && state.firstTime) {
+      const { to, cc, bcc, subject, body, files } = props.data;
+      console.log("getDerivedStateFromProps(FormEmail)", props.data);
+      let filesTemp = files;
+      if (files.length === 1 && files[0] === "") {
+        filesTemp = [];
+      }
+      return {
+        to: to.length > 0 ? to.toString() : "",
+        cc: cc.length > 0 ? cc.toString() : "",
+        bcc: bcc.length > 0 ? bcc.toString() : "",
+        subject,
+        body,
+        decodedFiles: filesTemp,
+      };
+    }
+    return null;
+  }
+
+  componentDidMount() {
+    if (this.props.from === "draft") {
+      const { to, cc, bcc, subject, body, files } = this.props.data;
+      console.log("componentDidMount(FormEmail)", this.props.data);
+      let filesTemp = files;
+      if (files.length === 1 && files[0] === "") {
+        filesTemp = [];
+      }
+      this.bodyRef.current.innerHTML = "";
+      this.setState({
+        to: to.length > 0 ? to.toString() : "",
+        cc: cc.length > 0 ? cc.toString() : "",
+        bcc: bcc.length > 0 ? bcc.toString() : "",
+        subject,
+        body,
+        decodedFiles: filesTemp,
+        firstTime: false,
+      });
+    }
   }
 
   handleOnCcBccClick = (e) => {
@@ -212,18 +255,25 @@ class FormEmail extends Component {
         console.log("/send-email - res - ", res);
         const { success, message_text } = res.data;
         if (success) {
+          self.clearState();
           Swal.fire({
             icon: "success",
-            title: "Email Sent",
-            text: "Email sent successfully.",
-            showConfirmButton: true,
-            confirmButtonText: "Okay",
-            confirmButtonColor: "#c6342c",
-            allowOutsideClick: false,
-            preConfirm: () => {
-              self.clearState();
-            },
+            text: "Email Sent!",
+            showConfirmButton: false,
+            timer: 1500,
           });
+          // Swal.fire({
+          //   icon: "success",
+          //   title: "Email Sent",
+          //   text: "Email sent successfully.",
+          //   showConfirmButton: true,
+          //   confirmButtonText: "Okay",
+          //   confirmButtonColor: "#c6342c",
+          //   allowOutsideClick: false,
+          //   preConfirm: () => {
+          //     self.clearState();
+          //   },
+          // });
         } else {
           Swal.fire({
             icon: "error",
@@ -258,7 +308,7 @@ class FormEmail extends Component {
       errors: [],
       showErrorBlock: false,
     });
-    // this.bodyRef.current.innerHTML = "";
+    this.bodyRef.current.innerHTML = "";
   };
 
   onFileChoose = (e) => {
@@ -353,7 +403,106 @@ class FormEmail extends Component {
       .catch((err) => console.log("/email/upload err - ", err));
   };
 
+  onSaveAsDraft = (e) => {
+    e.preventDefault();
+    const self = this;
+    if (this.validateSaveAsDraft()) {
+      const data = {
+        from: sessionStorage.getItem("email"),
+        to: this.state.to !== "" ? this.state.to.split(",") : "",
+        cc: this.state.cc !== "" ? this.state.cc.split(",") : "",
+        bcc: this.state.bcc !== "" ? this.state.bcc.split(",") : "",
+        subject: this.state.subject,
+        body: this.state.body,
+        files:
+          this.state.decodedFiles.length > 0
+            ? this.state.decodedFiles.map((file) => {
+                return {
+                  fileName: file.fileName,
+                  url: file.url,
+                  publicId: file.publicId,
+                };
+              })
+            : "",
+      };
+      axios
+        .post("/email/save-as-draft", data)
+        .then((res) => {
+          const { success, message_text, message_code = "" } = res.data;
+          if (success) {
+            // self.clearState();
+            Swal.fire({
+              icon: "success",
+              html: "Email saved as <strong>Draft</strong>!",
+              showConfirmButton: false,
+              timer: 1500,
+            });
+          } else {
+            if (message_code === "token_expired") {
+              Swal.fire({
+                icon: "error",
+                title: "Session Expired",
+                text: message_text,
+                showConfirmButton: true,
+                confirmButtonText: "Go to Login",
+                confirmButtonColor: "#c6342c",
+                allowOutsideClick: false,
+                preConfirm: () => {
+                  localStorage.removeItem("token");
+                  sessionStorage.removeItem("email");
+                  sessionStorage.removeItem("name");
+                  sessionStorage.removeItem("picture");
+                  self.props.history.replace("/login");
+                },
+              });
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Server Error",
+                text: "Something went wrong. Please try again later.",
+                showConfirmButton: true,
+                confirmButtonText: "Okay",
+                confirmButtonColor: "#c6342c",
+              });
+            }
+          }
+          console.log("/email/save-as-draft - res - ", res.data);
+        })
+        .catch((err) => console.log("/email/save-as-draft - err - ", err));
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Empty Draft",
+        text: "You need to give atleast 1 input to save this email as draft.",
+        showConfirmButton: true,
+        confirmButtonText: "Okay",
+        confirmButtonColor: "#c6342c",
+        allowOutsideClick: false,
+      });
+    }
+  };
+
+  validateSaveAsDraft = () => {
+    const { to, subject, cc, bcc, body, decodedFiles } = this.state;
+    if (
+      to === "" &&
+      subject === "" &&
+      cc === "" &&
+      bcc === "" &&
+      body === "" &&
+      decodedFiles.length === 0
+    ) {
+      return false;
+    }
+    return true;
+  };
+
   render() {
+    console.log("from = ", this.state.from);
+    if (this.props.from === "draft" && this.bodyRef.current !== null) {
+      this.bodyRef.current.innerHTML = this.state.body;
+    }
+
     const ccLayout = (
       <div className="mb-3">
         <label htmlFor="cc_email" className="form-label form-label-sm">
@@ -398,17 +547,22 @@ class FormEmail extends Component {
 
     return (
       <div id="form-email" className="card">
-        <div className="card-header custom-card-header">New Email</div>
+        <div className="card-header custom-card-header">
+          {this.state.from === undefined ? "New Email" : "Drafted Email"}
+        </div>
         <div className="card-body">
           {this.state.showErrorBlock && (
             <ul className="errors-container">
               {this.state.errors.length > 0 &&
-                this.state.errors.map((error) => (
-                  <li className="error-item">{error.message}</li>
+                this.state.errors.map((error, i) => (
+                  <li key={i} className="error-item">
+                    {error.message}
+                  </li>
                 ))}
             </ul>
           )}
-          <form onSubmit={this.onSendEmailClick} encType="multipart/form-data">
+
+          <form encType="multipart/form-data">
             {/* Start - To block */}
             <div className="mb-3">
               <div className="to-cc-bcc-container">
@@ -497,6 +651,7 @@ class FormEmail extends Component {
               {this.state.decodedFiles.map((file, i) => {
                 return (
                   <div
+                    key={i}
                     className={
                       file.isUploadInProgres
                         ? "single-file-container"
@@ -535,7 +690,9 @@ class FormEmail extends Component {
                 {/* Start - Send button */}
                 <button
                   type="submit"
-                  className="btn btn-primary btn-primary-sm"
+                  className="btn btn-primary btn-sm"
+                  style={{ paddingLeft: 20, paddingRight: 20 }}
+                  onClick={this.onSendEmailClick}
                 >
                   Send
                 </button>
@@ -559,17 +716,44 @@ class FormEmail extends Component {
                   onClick={() => this.fileRef.current.click()}
                 ></i>
               </div>
-              <i
-                className="bi bi-trash-fill"
-                style={{
-                  color: "#c6342c",
-                  fontSize: "1.5rem",
-                  cursor: "pointer",
-                  padding: 5,
-                  paddingRight: 0,
-                }}
-                onClick={this.clearState}
-              ></i>
+              {this.state.from === undefined ? (
+                <div>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={this.onSaveAsDraft}
+                  >
+                    Save as Draft
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    style={{ marginLeft: 20 }}
+                    onClick={this.clearState}
+                  >
+                    Clear
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={this.clearState}
+                  >
+                    Clear
+                  </button>
+                  <button
+                    className="btn btn-success btn-sm"
+                    style={{ marginLeft: 10 }}
+                  >
+                    Save
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    style={{ marginLeft: 10 }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
           </form>
         </div>

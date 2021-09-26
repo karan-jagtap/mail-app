@@ -31,7 +31,7 @@ router.post("/verify_token", (req, res) => {
   googleClient
     .verifyIdToken({ idToken: tokenId })
     .then((response) => {
-      console.log("karan - res", response);
+      // console.log("karan - res", response);
       res.json({
         success: true,
         message_code: "token_valid",

@@ -1,7 +1,10 @@
 .navbar-container {
+  position: fixed;
+  width: 100%;
   background-color: #0d0106 !important;
   margin: 0px;
   padding: 0px;
+  z-index: 1;
 }
 
 .navbar-header-container {

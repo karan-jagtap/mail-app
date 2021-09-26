@@ -78,7 +78,9 @@ class Home extends Component {
     return (
       <div style={{ minHeight: "100vh" }}>
         <Navbar {...this.props} onMenuItemClick={this.onMenuItemClick} />
-        {!this.state.loading && pageToDisplay}
+        <div style={{ paddingTop: 56 }}>
+          {!this.state.loading && pageToDisplay}
+        </div>
       </div>
     );
   }
